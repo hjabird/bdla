@@ -1,7 +1,9 @@
 /*============================================================================
-testmain.c
+nanimpl.h
 
-A dodgy self contained test system for bdla.h
+Generate NaN intentionally.
+
+MSVC doesn't do NaN, helpfully stops 0. / 0. and doesn't have nanf()...
 
 Copyright(c) 2019 HJA Bird
 
@@ -23,45 +25,18 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ============================================================================*/
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
 
-#define TEST(X) test(__FILE__, __LINE__, X)
-
-#define SECTION(X) section(X)
-
-int tests_passed = 0;
-int tests_completed = 0;
-char working_section_name[512] = "";
-
-void test(char* file_name, int line_no, int passed){
-    if(!passed){
-        printf("Test failed:\n\t%s\n\tLine %i\n", file_name, line_no);
-        assert(0);
-    } else {
-        tests_passed += 1;
-    }
-    tests_completed += 1;
-    return;
+static inline float gennanf() {
+	char bytes[sizeof(float)] = { 0xFF, 0xF0, 0x00, 0x00 };
+	return (float) *(&bytes[0]);
 }
 
-void section(char section_name[]){
-    if(tests_passed > 0){
-        printf("Passed %i of %i tests in section %s.\n", 
-            tests_passed, tests_completed, working_section_name);
-    }
-    tests_passed = 0;
-    tests_completed = 0;
-    strcpy(working_section_name, section_name);
-    return;
+static inline double gennan()
+{
+	char bytes[sizeof(double)] = { 0xFF, 0xF0, 0x00, 0x00,
+		0x00, 0x00, 0x00, 0x00 };
+	return (double) *(&bytes[0]);
 }
 
-#include "test_blasVxf.h"
-#include "test_blasMxf.h"
 
-int main(int argc, char* argv[]){
-	testVxf();
-	testMxf();
-    SECTION("Ending!");
-}
+

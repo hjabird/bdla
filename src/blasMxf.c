@@ -28,7 +28,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#include <cblas.h>
+#include <openblas/cblas.h>
 
 BDLA_EXPORT bdla_Mxf bdla_Mxf_create(int r, int c) {
 	assert(r > 0);

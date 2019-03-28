@@ -45,8 +45,7 @@ target_compile_definitions(bdla PRIVATE _CRT_SECURE_NO_WARNINGS)
 #target_include_directories(bdla PUBLIC bsv)
 
 find_package(OpenBLAS CONFIG REQUIRED)
-target_link_libraries(bdla PRIVATE OpenBLAS_LIBRARIES)
-target_include_directories(bdla PRIVATE OpenBLAS_INCLUDE_DIRS)
+target_link_libraries(bdla PRIVATE OpenBLAS::OpenBLAS)
 
 if (${CMAKE_C_COMPILER_ID} STREQUAL "GNU")
     link_libraries(bdla m)   # Maths std library.

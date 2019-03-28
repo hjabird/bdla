@@ -28,7 +28,7 @@ SOFTWARE.
 #include <stdlib.h>
 #include <string.h>
 
-#include <cblas.h>
+#include <openblas/cblas.h>
 
 BDLA_EXPORT bdla_Vxf bdla_Vxf_create(int len) {
 	assert(len > 0);

@@ -143,6 +143,7 @@ void testMxf(){
 	TEST(bdla_Mxf_mult(a, b, &d) == BDLA_GOOD);
 	TEST(bdla_Mxf_isequal(b, d));
 	TEST(bdla_Mxf_mult(b, c, &d) == BDLA_DIMENSION_MISMATCH);
+	/* And general multiplication.*/
 	bdla_Mxf_writevalue(a, 0, 2, 3.f);
 	bdla_Mxf_writevalue(a, 1, 2, 1.f);
 	bdla_Mxf_writevalue(a, 2, 2, 4.f);
@@ -157,7 +158,36 @@ void testMxf(){
 	TEST(bdla_Mxf_value(d, 1, 2) == -3.f);
 	TEST(bdla_Mxf_value(d, 2, 0) == 12.f);
 	TEST(bdla_Mxf_value(d, 2, 2) == 4.f);
-
+	/* Operation */				/* General matrix -vector multiplication */
+	bdla_Vxf_release(&va);
+	va = bdla_Vxf_create(3);
+	bdla_Vxf_uniform(&va, 2.f);
+	bdla_Vxf_writevalue(va, 2, 5.f);
+	bdla_Mxf_vmult(a, va, &va);
+	TEST(bdla_Vxf_value(va, 0) == 17.f);
+	TEST(bdla_Vxf_value(va, 1) == 7.f);
+	TEST(bdla_Vxf_value(va, 2) == 20.f);
+	/* Operations */				/* scalar div */	
+	bdla_Mxf_release(&a);
+	bdla_Mxf_release(&b);
+	bdla_Mxf_release(&c);
+	a = bdla_Mxf_create(3, 4);
+	b = bdla_Mxf_create(3, 4);
+	c = bdla_Mxf_create(3, 4);
+	bdla_Mxf_uniform(&a, 2.f);
+	bdla_Mxf_writevalue(a, 1, 2, 3.f);
+	bdla_Mxf_fdiv(a, 2.f, &c);
+	TEST(bdla_Mxf_value(c, 1, 2) == 1.5f);
+	TEST(bdla_Mxf_value(c, 0, 3) == 1.f);
+	/* Operations */				/* elementwise dov */
+	bdla_Mxf_uniform(&a, 2.f);
+	bdla_Mxf_writevalue(a, 1, 2, 3.f);
+	bdla_Mxf_uniform(&b, -4.f);
+	bdla_Mxf_writevalue(b, 2, 0, 3.f);
+	bdla_Mxf_ewdiv(a, b, &c);
+	TEST(bdla_Mxf_value(c, 1, 2) == -0.75f);
+	TEST(bdla_Mxf_value(c, 0, 3) == -0.5f);
+	TEST(bdla_Mxf_value(c, 2, 0) == 2.f / 3.f);
 
 
 

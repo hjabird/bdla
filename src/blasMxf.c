@@ -248,7 +248,7 @@ BDLA_EXPORT bdla_Status bdla_Mxf_vmult(bdla_Mxf A, bdla_Vxf b, bdla_Vxf *y) {
 		tmparr = malloc(sizeof(float) * y->len);
 	}
 	cblas_sgemv(CblasRowMajor, CblasNoTrans, A.dims[0], A.dims[1], 1.f,
-		A.arr, A.dims[1], b.arr, 1, 0.f, y->arr, 1);
+		A.arr, A.dims[1], b.arr, 1, 0.f, tmparr, 1);
 	if(alias){
 		free(y->arr);
 		y->arr = tmparr;

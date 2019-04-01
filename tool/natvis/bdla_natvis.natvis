@@ -3,8 +3,6 @@
   <Type Name="bdla_Vxf;">
     <DisplayString>{{ size={len} }}</DisplayString>
     <Expand>
-        <Item Name="[size]" ExcludeView="simple">_Mylast - _Myfirst</Item>
-        <Item Name="[capacity]" ExcludeView="simple">_Myend - _Myfirst</Item>
         <ArrayItems Condition="arr != 0">
             <Size>len</Size>
             <ValuePointer>arr</ValuePointer>

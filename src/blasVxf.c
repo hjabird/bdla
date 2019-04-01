@@ -220,15 +220,14 @@ BDLA_EXPORT bdla_Status bdla_Vxf_outer(bdla_Vxf a, bdla_Vxf b, bdla_Mxf *Y) {
 	return BDLA_GOOD;
 }
 
-BDLA_EXPORT bdla_Status bdla_Vxf_dot(bdla_Vxf a, bdla_Vxf b, float *y) {
+BDLA_EXPORT float bdla_Vxf_dot(bdla_Vxf a, bdla_Vxf b) {
 	assert(a.arr != NULL);
 	assert(a.len >= 0);
 	assert(b.arr != NULL);
 	assert(b.len >= 0);
-	assert(y != NULL);
-	if (a.len != b.len) { return BDLA_DIMENSION_MISMATCH; }
-	*y = cblas_sdot(a.len, a.arr, 1, b.arr, 1);
-	return BDLA_GOOD;
+	assert(a.len == b.len);
+	float y = cblas_sdot(a.len > b.len ? b.len : a.len, a.arr, 1, b.arr, 1);
+	return y;
 }
 
 BDLA_EXPORT float bdla_Vxf_norm2(bdla_Vxf a) {
@@ -310,21 +309,6 @@ BDLA_EXPORT bdla_Status bdla_Vxf_minmax(bdla_Vxf a, float *min, float *max) {
 		*min = lmin;
 		*max = lmax;
 	}
-	return BDLA_GOOD;
-}
-
-BDLA_EXPORT bdla_Status bdla_Vxf_value(bdla_Vxf a, int pos, float *y) {
-	assert(a.arr != NULL);
-	assert(y != NULL);
-	if (pos < 0 || pos >= a.len) { return BDLA_BAD_INDEX; }
-	*y = a.arr[pos];
-	return BDLA_GOOD;
-}
-
-BDLA_EXPORT bdla_Status bdla_Vxf_writevalue(bdla_Vxf a, int pos, float y) {
-	assert(a.arr != NULL);
-	if (pos < 0 || pos >= a.len) { return BDLA_BAD_INDEX; }
-	a.arr[pos] = y;
 	return BDLA_GOOD;
 }
 

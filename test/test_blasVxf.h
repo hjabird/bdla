@@ -32,114 +32,84 @@ SOFTWARE.
 int testVxf(){
     SECTION("Vector float");
 	bdla_Vxf a, b, c, d;
+	float out;
 	a = bdla_Vxf_create(4);
 	/* Basic writing & writing */
 	TEST(bdla_Vxf_length(a) == 4);
-	TEST(bdla_Vxf_writevalue(a, 0, 1.f) == BDLA_GOOD);
-	TEST(bdla_Vxf_writevalue(a, 1, 2.f) == BDLA_GOOD);
-	TEST(bdla_Vxf_writevalue(a, 2, 3.f) == BDLA_GOOD);
-	TEST(bdla_Vxf_writevalue(a, 3, 4.f) == BDLA_GOOD);
-	TEST(bdla_Vxf_writevalue(a, 4, 5.f) == BDLA_BAD_INDEX);
-	float out;
-	TEST(bdla_Vxf_value(a, 2, &out) == BDLA_GOOD);
-	TEST(out == 3.f);
-	bdla_Vxf_value(a, 0, &out);
-	TEST(out == 1.f);
-	TEST(bdla_Vxf_value(a, -1, &out) == BDLA_BAD_INDEX);
+	bdla_Vxf_writevalue(a, 0, 1.f);
+	bdla_Vxf_writevalue(a, 1, 2.f);
+	bdla_Vxf_writevalue(a, 2, 3.f);
+	bdla_Vxf_writevalue(a, 3, 4.f);
+	TEST(bdla_Vxf_value(a, 2) == 3.f);
+	TEST(bdla_Vxf_value(a, 0) == 1.f);
 	/* Copying */
 	b = bdla_Vxf_copy(a);
 	TEST(bdla_Vxf_length(b) == 4);
-	TEST(bdla_Vxf_value(a, 2, &out) == BDLA_GOOD);
-	TEST(out == 3.f);
+	TEST(bdla_Vxf_value(a, 2) == 3.f);
 	TEST(bdla_Vxf_isequal(a, b));
 
 	/* Generating */			/* Uniform value */
 	d = bdla_Vxf_create(10);
 	bdla_Vxf_uniform(&d, 3.f);
-	bdla_Vxf_value(d, 0, &out);
-	TEST(out == 3.f);
-	bdla_Vxf_value(d, 7, &out);
-	TEST(out == 3.f);
-	TEST(bdla_Vxf_value(d, 10, &out) == BDLA_BAD_INDEX);
+	TEST(bdla_Vxf_value(d, 0) == 3.f);
+	TEST(bdla_Vxf_value(d, 7) == 3.f);
 	/* Generating */			/* Linear spacing */
 	bdla_Vxf_linspace(&d, 1.f, 11.f);
-	bdla_Vxf_value(d, 0, &out);
-	TEST(out == 1.f);
-	bdla_Vxf_value(d, 9, &out);
-	TEST(out == 11.f);
-	bdla_Vxf_value(d, 4, &out);
-	TEST(out == 5.444444444444444444444444f);
+	TEST(bdla_Vxf_value(d, 0) == 1.f);
+	TEST(bdla_Vxf_value(d, 9) == 11.f);
+	TEST(bdla_Vxf_value(d, 4) == 5.444444444444444444444444f);
 	TEST(!bdla_Vxf_isequal(a, d));
 	bdla_Vxf_zero(&d);
-	bdla_Vxf_value(d, 4, &out);
-	TEST(out == 0.f);
+	TEST(bdla_Vxf_value(d, 4) == 0.f);
 
 	/* Basic arithmatic. */		/* PLUS */
 	c = bdla_Vxf_copy(a);
 	bdla_Vxf_plus(a, b, &c);
-	bdla_Vxf_value(c, 2, &out);
-	TEST(out == 6.f);
+	TEST(bdla_Vxf_value(c, 2) == 6.f);
 	bdla_Vxf_plus(a, a, &a);	/* inplace */
-	bdla_Vxf_value(a, 2, &out);
-	TEST(out == 6.f);
-	bdla_Vxf_value(a, 1, &out);
-	TEST(out == 4.f);
+	TEST(bdla_Vxf_value(a, 2) == 6.f);
+	TEST(bdla_Vxf_value(a, 1) == 4.f);
 	bdla_Vxf_plus(a, b, &a);	/* different inputs */
-	bdla_Vxf_value(a, 2, &out);
-	TEST(out == 9.f);
-	bdla_Vxf_value(a, 1, &out);
-	TEST(out == 6.f);
+	TEST(bdla_Vxf_value(a, 2) == 9.f);
+	TEST(bdla_Vxf_value(a, 1) == 6.f);
 	bdla_Vxf_fplus(a, -3.f, &a);
-	bdla_Vxf_value(a, 2, &out);
-	TEST(out == 6.f);
-	bdla_Vxf_value(a, 1, &out);
-	TEST(out == 3.f);
+	TEST(bdla_Vxf_value(a, 2) == 6.f);
+	TEST(bdla_Vxf_value(a, 1) == 3.f);
 
 	/* Basic arithmatic. */		/* MINUS */
 	bdla_Vxf_linspace(&b, 0.f, 3.f);
 	bdla_Vxf_uniform(&a, 1.f);
 	TEST(bdla_Vxf_minus(b, a, &d) == BDLA_DIMENSION_MISMATCH);
 	bdla_Vxf_minus(a, b, &c);
-	bdla_Vxf_value(c, 2, &out);
-	TEST(out == -1.f);
-	bdla_Vxf_value(c, 1, &out);
-	TEST(out == 0.f);
+	TEST(bdla_Vxf_value(c, 2) == -1.f);
+	TEST(bdla_Vxf_value(c, 1) == 0.f);
 	TEST(bdla_Vxf_fminus(b, 2, &d) == BDLA_DIMENSION_MISMATCH);
 	bdla_Vxf_fminus(b, -1.f, &a);
-	bdla_Vxf_value(a, 2, &out);
-	TEST(out == 3.f);
-	bdla_Vxf_value(a, 1, &out);
-	TEST(out == 2.f);
+	TEST(bdla_Vxf_value(a, 2) == 3.f);
+	TEST(bdla_Vxf_value(a, 1) == 2.f);
 
 	/* Basic arithmatic. */		/* MULTIPLY */
 	bdla_Vxf_linspace(&b, 0.f, 3.f);	/* by a scalar */
 	TEST(bdla_Vxf_fmult(b, 2, &d) == BDLA_DIMENSION_MISMATCH);
 	bdla_Vxf_fmult(b, 2, &a);
-	bdla_Vxf_value(a, 2, &out);
-	TEST(out == 4.f);
-	bdla_Vxf_value(a, 1, &out);
-	TEST(out == 2.f);
+	TEST(bdla_Vxf_value(a, 2) == 4.f);
+	TEST(bdla_Vxf_value(a, 1) == 2.f);
 	bdla_Vxf_ewmult(b, b, &a);
-	bdla_Vxf_value(a, 3, &out);
-	TEST(out == 9.f);
-	bdla_Vxf_value(a, 1, &out);
-	TEST(out == 1.f);
+	TEST(bdla_Vxf_value(a, 3) == 9.f);
+	TEST(bdla_Vxf_value(a, 1) == 1.f);
 	/* Bare in mind failures here may be due to bad matrices. */
 	bdla_Mxf mat = bdla_Mxf_create(4, 10);
 	bdla_Vxf_linspace(&d, 1.f, 10.f);
 	bdla_Vxf_linspace(&b, 1.f, 4.f);
 	bdla_Vxf_outer(b, d, &mat);
-	bdla_Mxf_value(mat, 2, 2, &out);
-	TEST(out == 9.f);
-	bdla_Mxf_value(mat, 3, 4, &out);
-	TEST(out == 20.f);
-	bdla_Mxf_value(mat, 1, 8, &out);
-	TEST(out == 18.f);
+	TEST(bdla_Mxf_value(mat, 2, 2) == 9.f);
+	TEST(bdla_Mxf_value(mat, 3, 4) == 20.f);
+	TEST(bdla_Mxf_value(mat, 1, 8) == 18.f);
 
 	/* Dot product */
 	bdla_Vxf_linspace(&b, 1.f, 4.f);
 	bdla_Vxf_linspace(&a, 0.f, 3.f);
-	bdla_Vxf_dot(a, b, &out);
+	out = bdla_Vxf_dot(a, b);
 	TEST(out == 20.f);
 	/* Norm2 */
 	out = bdla_Vxf_norm2(a);

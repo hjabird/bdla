@@ -32,6 +32,7 @@ SOFTWARE.
 #  define BDLA_EXPORT
 # endif
 #endif 
+#include <assert.h>
 
 typedef struct {
 	int rows, cols;
@@ -69,14 +70,11 @@ BDLA_EXPORT bdla_Status bdla_Mxf_fmult(bdla_Mxf A, float b, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_ewmult(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_mult(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_vmult(bdla_Mxf A, bdla_Vxf b, bdla_Vxf *y);
-BDLA_EXPORT bdla_Status bdla_Mxf_mult_symml(bdla_Mxf symA, bdla_Mxf B, bdla_Mxf *Y);
-BDLA_EXPORT bdla_Status bdla_Mxf_mult_symmr(bdla_Mxf symA, bdla_Mxf B, bdla_Mxf *Y);
-BDLA_EXPORT bdla_Status bdla_Mxf_mult_symmb(bdla_Mxf symA, bdla_Mxf B, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_fdiv(bdla_Mxf A, float b, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_ewdiv(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
 /* Writing and reading */
-BDLA_EXPORT bdla_Status bdla_Mxf_value(bdla_Mxf A, int row, int col, float *y);
-BDLA_EXPORT bdla_Status bdla_Mxf_writevalue(bdla_Mxf A, int row, int col, float y);
+static inline float bdla_Mxf_value(bdla_Mxf A, int row, int col);
+static inline void bdla_Mxf_writevalue(bdla_Mxf A, int row, int col, float y);
 BDLA_EXPORT bdla_Status bdla_Mxf_row(bdla_Mxf A, int row, bdla_Vxf *y);
 BDLA_EXPORT bdla_Status bdla_Mxf_writerow(bdla_Mxf A, int row, bdla_Vxf *y);
 BDLA_EXPORT bdla_Status bdla_Mxf_col(bdla_Mxf A, int col, bdla_Vxf *y);
@@ -108,18 +106,49 @@ BDLA_EXPORT bdla_Status bdla_Vxf_minus(bdla_Vxf a, bdla_Vxf b, bdla_Vxf *y);
 BDLA_EXPORT bdla_Status bdla_Vxf_fmult(bdla_Vxf a, float b, bdla_Vxf *y);
 BDLA_EXPORT bdla_Status bdla_Vxf_ewmult(bdla_Vxf a, bdla_Vxf b, bdla_Vxf *y);
 BDLA_EXPORT bdla_Status bdla_Vxf_outer(bdla_Vxf a, bdla_Vxf b, bdla_Mxf *Y);
-BDLA_EXPORT bdla_Status bdla_Vxf_dot(bdla_Vxf a, bdla_Vxf b, float *y);
+BDLA_EXPORT float bdla_Vxf_dot(bdla_Vxf a, bdla_Vxf b);
 BDLA_EXPORT float bdla_Vxf_norm2(bdla_Vxf a);
 BDLA_EXPORT float bdla_Vxf_sum(bdla_Vxf a);
 BDLA_EXPORT float bdla_Vxf_abssum(bdla_Vxf a);
 /* Writing and reading */
-BDLA_EXPORT bdla_Status bdla_Vxf_value(bdla_Vxf a, int pos, float *y);
-BDLA_EXPORT bdla_Status bdla_Vxf_writevalue(bdla_Vxf a, int pos, float y);
+static inline float bdla_Vxf_value(bdla_Vxf A, int pos);
+static inline void bdla_Vxf_writevalue(bdla_Vxf A, int pos, float y);
 BDLA_EXPORT bdla_Status bdla_Vxf_subvec(bdla_Vxf a, int pos, bdla_Vxf *y);
 BDLA_EXPORT bdla_Status bdla_Vxf_writesubvec(bdla_Vxf a, int pos, bdla_Vxf *y);
 /* Setting to specific values */
 BDLA_EXPORT bdla_Status bdla_Vxf_zero(bdla_Vxf *a);
 BDLA_EXPORT bdla_Status bdla_Vxf_uniform(bdla_Vxf *a, float b);
 BDLA_EXPORT bdla_Status bdla_Vxf_linspace(bdla_Vxf *a, float startval, float endval);
+
+
+/* IMPLEMENTATION ----------------------------------------------------------*/
+
+/* Implementation of direct access functions - inlined. */
+static inline float bdla_Mxf_value(bdla_Mxf A, int row, int col) {
+	assert(A.arr != NULL && "Bad input matrix");
+	assert(row >= 0 && row < A.rows && "Bad row index");
+	assert(col >= 0 && col < A.cols && "Bad column index");
+	return A.arr[col + row * A.cols];
+}
+
+static inline void bdla_Mxf_writevalue(bdla_Mxf A, int row, int col, float y) {
+	assert(A.arr != 0 && "Bad input matrix");
+	assert(row >= 0 && row < A.rows && "Bad row index");
+	assert(col >= 0 && col < A.cols && "Bad column index");
+	A.arr[col + row * A.cols] = y;
+}
+
+static inline float bdla_Vxf_value(bdla_Vxf A, int pos) {
+	assert(A.arr != NULL && "Bad input matrix");
+	assert(pos >= 0 && pos < A.len && "Bad index");
+	return A.arr[pos];
+}
+
+static inline void bdla_Vxf_writevalue(bdla_Vxf A, int pos, float y) {
+	assert(A.arr != 0 && "Bad input matrix");
+	assert(pos >= 0 && pos < A.len && "Bad index");
+	A.arr[pos] = y;
+}
+
 
 #endif /* BDLA_LIBBDLA_H */

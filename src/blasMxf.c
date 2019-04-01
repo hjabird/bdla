@@ -256,78 +256,6 @@ BDLA_EXPORT bdla_Status bdla_Mxf_vmult(bdla_Mxf A, bdla_Vxf b, bdla_Vxf *y) {
 	return BDLA_GOOD;
 }
 
-BDLA_EXPORT bdla_Status bdla_Mxf_mult_symml(bdla_Mxf symA, bdla_Mxf B, bdla_Mxf *Y) {
-	assert(Y != NULL);
-	assert(Y->arr != NULL);
-	assert(symA.arr != NULL);
-	if (symA.cols != B.rows) { return BDLA_DIMENSION_MISMATCH; }
-	if (symA.rows != Y->cols || symA.cols != Y->rows) { 
-		return BDLA_DIMENSION_MISMATCH; 
-	}
-	int alias = 0;
-	float *outarr = Y->arr;
-	if (Y->arr == symA.arr) {
-		alias = 1;
-		outarr = malloc(sizeof(float) * Y->cols * Y->rows);
-		if (outarr == NULL) { return BDLA_MEM_ERROR; }
-	}
-	cblas_ssymm(CblasRowMajor, CblasLeft, CblasUpper, Y->rows, Y->cols, 1.f,
-		symA.arr, symA.cols, B.arr, B.cols, 0.f, Y->arr, Y->cols);
-	if (alias) {
-		Y->arr = outarr;
-		free(symA.arr);
-	}
-	return BDLA_GOOD;
-}
-
-BDLA_EXPORT bdla_Status bdla_Mxf_mult_symmr(bdla_Mxf A, bdla_Mxf symB, bdla_Mxf *Y) {
-	assert(Y != NULL);
-	assert(Y->arr != NULL);
-	assert(A.arr != NULL);
-	if (A.cols != symB.rows) { return BDLA_DIMENSION_MISMATCH; }
-	if (A.rows != Y->cols || A.cols != Y->rows) { 
-		return BDLA_DIMENSION_MISMATCH; 
-	}
-	int alias = 0;
-	float *outarr = Y->arr;
-	if (Y->arr == A.arr) {
-		alias = 1;
-		outarr = malloc(sizeof(float) * Y->cols * Y->rows);
-		if (outarr == NULL) { return BDLA_MEM_ERROR; }
-	}
-	cblas_ssymm(CblasRowMajor, CblasLeft, CblasUpper, Y->rows, Y->cols, 1.f,
-		A.arr, A.cols, symB.arr, symB.cols, 0.f, Y->arr, Y->cols);
-	if (alias) {
-		Y->arr = outarr;
-		free(A.arr);
-	}
-	return BDLA_GOOD;
-}
-
-BDLA_EXPORT bdla_Status bdla_Mxf_mult_symmb(bdla_Mxf symA, bdla_Mxf symB, bdla_Mxf *Y) {
-	assert(Y != NULL);
-	assert(Y->arr != NULL);
-	assert(symA.arr != NULL);
-	if (symA.cols != symB.rows) { return BDLA_DIMENSION_MISMATCH; }
-	if (symA.rows != Y->cols || symA.cols != Y->rows) { 
-		return BDLA_DIMENSION_MISMATCH; 
-	}
-	int alias = 0;
-	float *outarr = Y->arr;
-	if (Y->arr == symA.arr) {
-		alias = 1;
-		outarr = malloc(sizeof(float) * Y->cols * Y->rows);
-		if (outarr == NULL) { return BDLA_MEM_ERROR; }
-	}
-	cblas_ssymm(CblasRowMajor, CblasLeft, CblasUpper, Y->rows, Y->cols, 1.f,
-		symA.arr, symA.cols, symB.arr, symB.cols, 0.f, Y->arr, Y->cols);
-	if (alias) {
-		Y->arr = outarr;
-		free(symA.arr);
-	}
-	return BDLA_GOOD;
-}
-
 BDLA_EXPORT bdla_Status bdla_Mxf_fdiv(bdla_Mxf A, float b, bdla_Mxf *Y) {
 	assert(Y != NULL);
 	assert(Y->arr != NULL);
@@ -358,23 +286,6 @@ BDLA_EXPORT bdla_Status bdla_Mxf_ewdiv(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y) {
 	for (i = 0; i < max; ++i) {
 		Y->arr[i] = A.arr[i] / B.arr[i];
 	}
-	return BDLA_GOOD;
-}
-
-BDLA_EXPORT bdla_Status bdla_Mxf_value(bdla_Mxf A, int row, int col, float *y) {
-	assert(y != NULL);
-	assert(A.arr != NULL);
-	if (row < 0 || row > A.rows) { return BDLA_BAD_INDEX; }
-	if (col < 0 || col > A.cols) { return BDLA_BAD_INDEX; }
-	*y = A.arr[col + row * A.cols];
-	return BDLA_GOOD;
-}
-
-BDLA_EXPORT bdla_Status bdla_Mxf_writevalue(bdla_Mxf A, int row, int col, float y) {
-	assert(A.arr != NULL);
-	if (row < 0 || row >= A.rows) { return BDLA_BAD_INDEX; }
-	if (col < 0 || col >= A.cols) { return BDLA_BAD_INDEX; }
-	A.arr[col + row * A.cols] = y;
 	return BDLA_GOOD;
 }
 

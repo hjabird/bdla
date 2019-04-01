@@ -33,6 +33,7 @@ void testMxf(){
 	SECTION("Matrix float");
 	bdla_Mxf a, b, c, d;
 	bdla_Vxf va, vb, vc, vd;
+	float out;
 
 	/* Creation and copying */
 	a = bdla_Mxf_create(3, 4);
@@ -47,39 +48,27 @@ void testMxf(){
 	TEST(!bdla_Mxf_isequal(a, c));
 
 	/* Writing and reading */
-	TEST(bdla_Mxf_writevalue(a, 1, 1, 3.f) == BDLA_GOOD);
-	TEST(bdla_Mxf_writevalue(a, 3, 2, 0.f) == BDLA_BAD_INDEX);
-	float out;
-	TEST(bdla_Mxf_value(a, 1, 1, &out) == BDLA_GOOD);
-	TEST(out == 3.f);
+	bdla_Mxf_writevalue(a, 1, 1, 3.f);
+	TEST(bdla_Mxf_value(a, 1, 1) == 3.f);
 
 	/* Filling with values... */	/* uniform */
 	bdla_Mxf_uniform(&a, 1.f);		
-	bdla_Mxf_value(a, 1, 1, &out);
-	TEST(out == 1.f);
-	bdla_Mxf_value(a, 2, 0, &out);
-	TEST(out == 1.f);
+	TEST(bdla_Mxf_value(a, 1, 1) == 1.f);
+	TEST(bdla_Mxf_value(a, 2, 0) == 1.f);
 	/* Filling with values... */	/* zero */
 	bdla_Mxf_zero(&b);				
-	bdla_Mxf_value(b, 1, 1, &out);
-	TEST(out == 0.f);
-	bdla_Mxf_value(b, 2, 0, &out);
-	TEST(out == 0.f);
+	TEST(bdla_Mxf_value(b, 1, 1) == 0.f);
+	TEST(bdla_Mxf_value(b, 2, 0) == 0.f);
 	TEST(!bdla_Mxf_isequal(a, b));
 	bdla_Mxf_release(&c);
 	c = bdla_Mxf_create(5, 5);
 	/* Filling with values... */	/* eye */
 	bdla_Mxf_eye(&c);				
-	bdla_Mxf_value(c, 1, 1, &out);
-	TEST(out == 1.f);
-	bdla_Mxf_value(c, 2, 2, &out);
-	TEST(out == 1.f);
-	bdla_Mxf_value(c, 4, 4, &out);
-	TEST(out == 1.f);
-	bdla_Mxf_value(c, 1, 4, &out);
-	TEST(out == 0.f);
-	bdla_Mxf_value(c, 0, 2, &out);
-	TEST(out == 0.f);
+	TEST(bdla_Mxf_value(c, 1, 1) == 1.f);
+	TEST(bdla_Mxf_value(c, 1, 1) == 1.f);
+	TEST(bdla_Mxf_value(c, 4, 4) == 1.f);
+	TEST(bdla_Mxf_value(c, 1, 4) == 0.f);
+	TEST(bdla_Mxf_value(c, 0, 2) == 0.f);
 	/* Filling with values... */	/* diag */
 	bdla_Mxf_release(&b);			
 	b = bdla_Mxf_create(5, 5);
@@ -91,12 +80,9 @@ void testMxf(){
 	va = bdla_Vxf_create(3);
 	bdla_Vxf_uniform(&va, 1.f);
 	bdla_Mxf_diag(&b, va, 2);
-	bdla_Mxf_value(b, 0, 2, &out);
-	TEST(out == 1.f);
-	bdla_Mxf_value(b, 1, 4, &out);
-	TEST(out == 0.f);
-	bdla_Mxf_value(b, 0, 3, &out);
-	TEST(out == 0.f);
+	TEST(bdla_Mxf_value(b, 0, 2) == 1.f);
+	TEST(bdla_Mxf_value(b, 1, 4) == 0.f);
+	TEST(bdla_Mxf_value(b, 0, 3) == 0.f);
 
 	/* Operations */				/* scalar plus */
 	bdla_Mxf_release(&a);
@@ -107,67 +93,49 @@ void testMxf(){
 	c = bdla_Mxf_create(3, 4);
 	bdla_Mxf_uniform(&a, 2.f);
 	bdla_Mxf_fplus(a, 2.f, &b);
-	bdla_Mxf_value(b, 0, 2, &out);
-	TEST(out == 4.f);
-	bdla_Mxf_value(b, 1, 4, &out);
-	TEST(out == 4.f);
-	bdla_Mxf_value(b, 0, 3, &out);
-	TEST(out == 4.f);
-	bdla_Mxf_value(a, 0, 3, &out);
-	TEST(out == 2.f);
+	TEST(bdla_Mxf_value(b, 0, 2) == 4.f);
+	TEST(bdla_Mxf_value(b, 1, 2) == 4.f);
+	TEST(bdla_Mxf_value(b, 0, 3) == 4.f);
+	TEST(bdla_Mxf_value(a, 0, 3) == 2.f);
 	bdla_Mxf_fplus(a, 2.f, &a);
-	bdla_Mxf_value(a, 0, 3, &out);
-	TEST(out == 4.f);
+	TEST(bdla_Mxf_value(a, 0, 3) == 4.f);
 	/* Operations */				/* plus */
 	bdla_Mxf_uniform(&a, 2.f);
 	bdla_Mxf_uniform(&b, -1.f);
 	bdla_Mxf_writevalue(b, 1, 2, 3.f);
 	bdla_Mxf_plus(a, b, &c);
-	bdla_Mxf_value(c, 1, 2, &out);
-	TEST(out == 5.f);
-	bdla_Mxf_value(c, 0, 3, &out);
-	TEST(out == 1.f);
+	TEST(bdla_Mxf_value(c, 1, 2) == 5.f);
+	TEST(bdla_Mxf_value(c, 0, 3) == 1.f);
 	/* Operations */				/* scalar minus */
 	bdla_Mxf_uniform(&a, 2.f);
 	bdla_Mxf_writevalue(a, 1, 2, 3.f);
 	bdla_Mxf_fminus(a, 1.f, &b);
-	bdla_Mxf_value(b, 0, 2, &out);
-	TEST(out == 1.f);
-	bdla_Mxf_value(b, 1, 4, &out);
-	TEST(out == 1.f);
-	bdla_Mxf_value(b, 0, 3, &out);
-	TEST(out == 1.f);
-	bdla_Mxf_value(b, 1, 2, &out);
-	TEST(out == 2.f);
+	TEST(bdla_Mxf_value(b, 0, 2) == 1.f);
+	TEST(bdla_Mxf_value(b, 1, 3) == 1.f);
+	TEST(bdla_Mxf_value(b, 0, 3) == 1.f);
+	TEST(bdla_Mxf_value(b, 1, 2) == 2.f);
 	/* Operations */				/* minus */
 	bdla_Mxf_uniform(&a, 2.f);
 	bdla_Mxf_uniform(&b, -1.f);
 	bdla_Mxf_writevalue(b, 1, 2, 3.f);
 	bdla_Mxf_minus(a, b, &c);
-	bdla_Mxf_value(c, 1, 2, &out);
-	TEST(out == -1.f);
-	bdla_Mxf_value(c, 0, 3, &out);
-	TEST(out == 3.f);
+	TEST(bdla_Mxf_value(c, 1, 2) == -1.f);
+	TEST(bdla_Mxf_value(c, 0, 3) == 3.f);
 	/* Operations */				/* scalar mult */
 	bdla_Mxf_uniform(&a, 2.f);
 	bdla_Mxf_writevalue(a, 1, 2, 3.f);
 	bdla_Mxf_fmult(a, 2.f, &c);
-	bdla_Mxf_value(c, 1, 2, &out);
-	TEST(out == 6.f);
-	bdla_Mxf_value(c, 0, 3, &out);
-	TEST(out == 4.f);
+	TEST(bdla_Mxf_value(c, 1, 2) == 6.f);
+	TEST(bdla_Mxf_value(c, 0, 3) == 4.f);
 	/* Operations */				/* elementwise mult */
 	bdla_Mxf_uniform(&a, 2.f);
 	bdla_Mxf_writevalue(a, 1, 2, 3.f);
 	bdla_Mxf_uniform(&b, -4.f);
 	bdla_Mxf_writevalue(b, 2, 0, 3.f);
 	bdla_Mxf_ewmult(a, b, &c);
-	bdla_Mxf_value(c, 1, 2, &out);
-	TEST(out == -12.f);
-	bdla_Mxf_value(c, 0, 3, &out);
-	TEST(out == -8.f);
-	bdla_Mxf_value(c, 2, 0, &out);
-	TEST(out == 6.f);
+	TEST(bdla_Mxf_value(c, 1, 2) == -12.f);
+	TEST(bdla_Mxf_value(c, 0, 3) == -8.f);
+	TEST(bdla_Mxf_value(c, 2, 0) == 6.f);
 
 
 

@@ -35,7 +35,7 @@ SOFTWARE.
 #include <assert.h>
 
 typedef struct {
-	int rows, cols;
+	int dims[2];
 	float *arr;
 } bdla_Mxf;
 
@@ -126,16 +126,16 @@ BDLA_EXPORT bdla_Status bdla_Vxf_linspace(bdla_Vxf *a, float startval, float end
 /* Implementation of direct access functions - inlined. */
 static inline float bdla_Mxf_value(bdla_Mxf A, int row, int col) {
 	assert(A.arr != NULL && "Bad input matrix");
-	assert(row >= 0 && row < A.rows && "Bad row index");
-	assert(col >= 0 && col < A.cols && "Bad column index");
-	return A.arr[col + row * A.cols];
+	assert(row >= 0 && row < A.dims[0] && "Bad row index");
+	assert(col >= 0 && col < A.dims[1] && "Bad column index");
+	return A.arr[col + row * A.dims[1]];
 }
 
 static inline void bdla_Mxf_writevalue(bdla_Mxf A, int row, int col, float y) {
 	assert(A.arr != 0 && "Bad input matrix");
-	assert(row >= 0 && row < A.rows && "Bad row index");
-	assert(col >= 0 && col < A.cols && "Bad column index");
-	A.arr[col + row * A.cols] = y;
+	assert(row >= 0 && row < A.dims[0] && "Bad row index");
+	assert(col >= 0 && col < A.dims[1] && "Bad column index");
+	A.arr[col + row * A.dims[1]] = y;
 }
 
 static inline float bdla_Vxf_value(bdla_Vxf A, int pos) {

@@ -136,6 +136,28 @@ void testMxf(){
 	TEST(bdla_Mxf_value(c, 1, 2) == -12.f);
 	TEST(bdla_Mxf_value(c, 0, 3) == -8.f);
 	TEST(bdla_Mxf_value(c, 2, 0) == 6.f);
+	/* Operation */					/* general matrix mult */
+	bdla_Mxf_release(&a);
+	a = bdla_Mxf_create(3, 3);
+	bdla_Mxf_eye(&a);	/* Identity matrix mult */
+	TEST(bdla_Mxf_mult(a, b, &d) == BDLA_GOOD);
+	TEST(bdla_Mxf_isequal(b, d));
+	TEST(bdla_Mxf_mult(b, c, &d) == BDLA_DIMENSION_MISMATCH);
+	bdla_Mxf_writevalue(a, 0, 2, 3.f);
+	bdla_Mxf_writevalue(a, 1, 2, 1.f);
+	bdla_Mxf_writevalue(a, 2, 2, 4.f);
+	bdla_Mxf_uniform(&b, 3.f);
+	bdla_Mxf_writevalue(b, 1, 2, -4.f);
+	bdla_Mxf_writevalue(b, 2, 2, 1.f);
+	TEST(bdla_Mxf_mult(a, b, &d) == BDLA_GOOD);
+	TEST(bdla_Mxf_value(d, 0, 0) == 12.f);
+	TEST(bdla_Mxf_value(d, 0, 1) == 12.f);
+	TEST(bdla_Mxf_value(d, 0, 2) == 6.f);
+	TEST(bdla_Mxf_value(d, 0, 3) == 12.f);
+	TEST(bdla_Mxf_value(d, 1, 2) == -3.f);
+	TEST(bdla_Mxf_value(d, 2, 0) == 12.f);
+	TEST(bdla_Mxf_value(d, 2, 2) == 4.f);
+
 
 
 

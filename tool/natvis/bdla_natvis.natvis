@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="bdla_Vxf;">
+    <DisplayString>{{ size={len} }}</DisplayString>
+    <Expand>
+        <Item Name="[size]" ExcludeView="simple">_Mylast - _Myfirst</Item>
+        <Item Name="[capacity]" ExcludeView="simple">_Myend - _Myfirst</Item>
+        <ArrayItems Condition="arr != 0">
+            <Size>len</Size>
+            <ValuePointer>arr</ValuePointer>
+        </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="bdla_Mxf;">
+    <DisplayString>{{ size=({dims[0]}, {dims[1]}) }}</DisplayString>
+    <Expand>
+        <Item Name="[rows]" ExcludeView="simple">dims[0]</Item>
+        <Item Name="[cols]" ExcludeView="simple">dims[1]</Item>
+        <ArrayItems Condition="arr != 0">
+			<Direction>Forward</Direction>
+			<Rank>2</Rank>
+			<Size>dims[$i]</Size>
+			<ValuePointer>arr</ValuePointer>
+		</ArrayItems>
+    </Expand>
+  </Type>
+</AutoVisualizer>

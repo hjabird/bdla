@@ -209,9 +209,9 @@ BDLA_EXPORT bdla_Status bdla_Vxf_outer(bdla_Vxf a, bdla_Vxf b, bdla_Mxf *Y) {
 	assert(b.len >= 0);
 	assert(Y != NULL);
 	assert(Y->arr != NULL);
-	assert(Y->cols >= 0);
-	assert(Y->rows >= 0);
-	if (a.len != Y->rows || Y->cols != b.len ) { 
+	assert(Y->dims[1] >= 0);
+	assert(Y->dims[0] >= 0);
+	if (a.len != Y->dims[0] || Y->dims[1] != b.len ) { 
 		return BDLA_DIMENSION_MISMATCH; 
 	}
 	/* Since we want to overwrite whatever is in Y. */

@@ -50,17 +50,40 @@ typedef enum {
 	BDLA_MEM_ERROR = -2,
 	BDLA_BAD_INDEX = -3,
 	BDLA_UNDERSIZED = -4,
-	BDLA_NONSQUARE = -5
+	BDLA_NONSQUARE = -5,
+	BDLA_BAD_PROPERTY
 } bdla_Status;
 
+typedef enum {
+	BDLA_MATRIX_GENERAL,
+	BDLA_MATRIX_SYMMETRIC,
+	BDLA_MATRIX_TRI_LOWER,
+	BDLA_MATRIX_TRI_UPPER,
+	BDLA_MATRIX_TRIDIAGONAL,
+	BDLA_MATRIX_HERMITIAN,
+	BDLA_MATRIX_POSITIVE_DEFINITE,
+	BDLA_MATRIX_DIAGONALLY_DOMINANT,
+	BDLA_MATRIX_SQUARE
+} bdla_MatrixProperty;
+
+/* Mxf - Variable sized single precision matrix ----------------------------*/
 /* Creation & destruction */
 BDLA_EXPORT bdla_Mxf bdla_Mxf_create(int r, int c);
 BDLA_EXPORT void bdla_Mxf_release(bdla_Mxf *mat);
 BDLA_EXPORT bdla_Mxf bdla_Mxf_copy(bdla_Mxf mat);
+/* Shape changing */
+BDLA_EXPORT void bdla_Mxf_transpose(bdla_Mxf A, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_reshape(bdla_Mxf A, int rows, int cols, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_resize(bdla_Mxf *A, int rows, int cols);
 /* Info */
 BDLA_EXPORT int bdla_Mxf_rows(bdla_Mxf A);
 BDLA_EXPORT int bdla_Mxf_cols(bdla_Mxf A);
-BDLA_EXPORT int bdla_Mxf_isequal(bdla_Mxf a, bdla_Mxf b);
+BDLA_EXPORT int bdla_Mxf_isequal(bdla_Mxf A, bdla_Mxf B);
+BDLA_EXPORT int bdla_Mxf_issquare(bdla_Mxf A);
+BDLA_EXPORT int bdla_Mxf_issymmetric(bdla_Mxf A);
+BDLA_EXPORT int bdla_Mxf_isdiagonal(bdla_Mxf A);
+BDLA_EXPORT int bdla_Mxf_istrilower(bdla_Mxf A);
+BDLA_EXPORT int bdla_Mxf_istriupper(bdla_Mxf A);
 /* Manipulation */
 BDLA_EXPORT bdla_Status bdla_Mxf_fplus(bdla_Mxf A, float b, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_plus(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
@@ -69,9 +92,17 @@ BDLA_EXPORT bdla_Status bdla_Mxf_minus(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_fmult(bdla_Mxf A, float b, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_ewmult(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_mult(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_mult_ext(bdla_Mxf A, bdla_MatrixProperty A_prop, 
+	bdla_Mxf B, bdla_MatrixProperty B_prop, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_vmult(bdla_Mxf A, bdla_Vxf b, bdla_Vxf *y);
 BDLA_EXPORT bdla_Status bdla_Mxf_fdiv(bdla_Mxf A, float b, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_ewdiv(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_trisolve(bdla_Mxf A, bdla_MatrixProperty A_prop,
+	bdla_Mxf B, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_vtrisolve(bdla_Mxf A, bdla_MatrixProperty A_prop,
+	bdla_Vxf b, bdla_Vxf *y);
+BDLA_EXPORT bdla_Status bdla_Mxf_diagsolve(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_vdiagsolve(bdla_Mxf A,	bdla_Vxf b, bdla_Vxf *y);
 /* Writing and reading */
 static inline float bdla_Mxf_value(bdla_Mxf A, int row, int col);
 static inline void bdla_Mxf_writevalue(bdla_Mxf A, int row, int col, float y);
@@ -87,10 +118,13 @@ BDLA_EXPORT bdla_Status bdla_Mxf_uniform(bdla_Mxf *A, float b);
 BDLA_EXPORT bdla_Status bdla_Mxf_eye(bdla_Mxf *A);
 BDLA_EXPORT bdla_Status bdla_Mxf_diag(bdla_Mxf *A, bdla_Vxf b, int k);
 
+/* Vxf - Variable sized single precision vector ----------------------------*/
 /* Creation */
 BDLA_EXPORT bdla_Vxf bdla_Vxf_create(int len);
 BDLA_EXPORT void bdla_Vxf_release(bdla_Vxf *vec);
 BDLA_EXPORT bdla_Vxf bdla_Vxf_copy(bdla_Vxf vec);
+/* Shape changing */
+BDLA_EXPORT bdla_Status bdla_Vxf_resize(bdla_Vxf *a, int len);
 /* Info */
 BDLA_EXPORT int bdla_Vxf_length(bdla_Vxf a);
 BDLA_EXPORT int bdla_Vxf_isequal(bdla_Vxf a, bdla_Vxf b);
@@ -111,15 +145,14 @@ BDLA_EXPORT float bdla_Vxf_norm2(bdla_Vxf a);
 BDLA_EXPORT float bdla_Vxf_sum(bdla_Vxf a);
 BDLA_EXPORT float bdla_Vxf_abssum(bdla_Vxf a);
 /* Writing and reading */
-static inline float bdla_Vxf_value(bdla_Vxf A, int pos);
-static inline void bdla_Vxf_writevalue(bdla_Vxf A, int pos, float y);
+static inline float bdla_Vxf_value(bdla_Vxf a, int pos);
+static inline void bdla_Vxf_writevalue(bdla_Vxf a, int pos, float y);
 BDLA_EXPORT bdla_Status bdla_Vxf_subvec(bdla_Vxf a, int pos, bdla_Vxf *y);
 BDLA_EXPORT bdla_Status bdla_Vxf_writesubvec(bdla_Vxf a, int pos, bdla_Vxf *y);
 /* Setting to specific values */
 BDLA_EXPORT bdla_Status bdla_Vxf_zero(bdla_Vxf *a);
 BDLA_EXPORT bdla_Status bdla_Vxf_uniform(bdla_Vxf *a, float b);
 BDLA_EXPORT bdla_Status bdla_Vxf_linspace(bdla_Vxf *a, float startval, float endval);
-
 
 /* IMPLEMENTATION ----------------------------------------------------------*/
 
@@ -138,16 +171,16 @@ static inline void bdla_Mxf_writevalue(bdla_Mxf A, int row, int col, float y) {
 	A.arr[col + row * A.dims[1]] = y;
 }
 
-static inline float bdla_Vxf_value(bdla_Vxf A, int pos) {
-	assert(A.arr != NULL && "Bad input matrix");
-	assert(pos >= 0 && pos < A.len && "Bad index");
-	return A.arr[pos];
+static inline float bdla_Vxf_value(bdla_Vxf a, int pos) {
+	assert(a.arr != NULL && "Bad input matrix");
+	assert(pos >= 0 && pos < a.len && "Bad index");
+	return a.arr[pos];
 }
 
-static inline void bdla_Vxf_writevalue(bdla_Vxf A, int pos, float y) {
-	assert(A.arr != 0 && "Bad input matrix");
-	assert(pos >= 0 && pos < A.len && "Bad index");
-	A.arr[pos] = y;
+static inline void bdla_Vxf_writevalue(bdla_Vxf a, int pos, float y) {
+	assert(a.arr != 0 && "Bad input matrix");
+	assert(pos >= 0 && pos < a.len && "Bad index");
+	a.arr[pos] = y;
 }
 
 

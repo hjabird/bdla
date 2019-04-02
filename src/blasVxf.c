@@ -54,6 +54,19 @@ BDLA_EXPORT bdla_Vxf bdla_Vxf_copy(bdla_Vxf vec) {
 	return ret;
 }
 
+BDLA_EXPORT bdla_Status bdla_Vxf_resize(bdla_Vxf *a, int len) {
+	assert(len > 0);
+	assert(a != NULL);
+	assert(a->arr != NULL);
+	assert(a->len > 0);
+	if (len != a->len) {
+		a->arr = realloc(a->arr, sizeof(float) * len);
+		a->len = len;
+	}
+	if (a->arr == NULL) { return BDLA_MEM_ERROR; }
+	return BDLA_GOOD;
+}
+
 BDLA_EXPORT int bdla_Vxf_length(bdla_Vxf A) {
 	assert(A.arr != NULL);
 	assert(A.arr >= 0);

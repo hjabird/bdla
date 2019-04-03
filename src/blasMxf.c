@@ -307,6 +307,41 @@ BDLA_EXPORT bdla_Status bdla_Mxf_fplus(bdla_Mxf A, float b, bdla_Mxf *Y) {
 	return BDLA_GOOD;
 }
 
+BDLA_EXPORT bdla_Status bdla_Mxf_diagplus(bdla_Mxf A, bdla_Vxf b, int k, bdla_Mxf *Y) {
+	assert(Y != NULL);
+	assert(Y->arr != NULL);
+	assert(Y->dims[1] > 0);
+	assert(Y->dims[0] > 0);
+	assert(A.arr != NULL);
+	assert(A.dims[1] > 0);
+	assert(A.dims[0] > 0);
+	assert(b.arr != NULL);
+	assert(b.len > 0);
+	int i, j, iter;
+	/* Check that the diagonal fits within the matrix. */
+	if (k >= 0) {
+		i = b.len;
+		j = k + b.len;
+	}
+	else {
+		i = b.len - k;
+		j = b.len;
+	}
+	if (!(i == A.dims[0] && j <= A.dims[1]) && !(j == A.dims[1] && i <= A.dims[0])) {
+		return BDLA_DIMENSION_MISMATCH;
+	}
+	bdla_Mxf_release(Y);
+	*Y = bdla_Mxf_copy(A);
+	i = j = 0;
+	if (k >= 0) { j = k; }
+	else { i = -k; }
+	for (iter = 0; iter < b.len; ++iter, ++i, ++j) {
+		bdla_Mxf_writevalue(*Y, i, j,
+			bdla_Mxf_value(*Y, i, j) + bdla_Vxf_value(b, iter));
+	}
+	return BDLA_GOOD;
+}
+
 BDLA_EXPORT bdla_Status bdla_Mxf_minus(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y) {
 	assert(Y != NULL);
 	assert(Y->arr != NULL);
@@ -345,6 +380,41 @@ BDLA_EXPORT bdla_Status bdla_Mxf_fminus(bdla_Mxf A, float b, bdla_Mxf *Y) {
 	max = A.dims[1] * A.dims[0];
 	for (i = 0; i < max; ++i) {
 		Y->arr[i] = A.arr[i] - b;
+	}
+	return BDLA_GOOD;
+}
+
+BDLA_EXPORT bdla_Status bdla_Mxf_diagminus(bdla_Mxf A, bdla_Vxf b, int k, bdla_Mxf *Y) {
+	assert(Y != NULL);
+	assert(Y->arr != NULL);
+	assert(Y->dims[1] > 0);
+	assert(Y->dims[0] > 0);
+	assert(A.arr != NULL);
+	assert(A.dims[1] > 0);
+	assert(A.dims[0] > 0);
+	assert(b.arr != NULL);
+	assert(b.len > 0);
+	int i, j, iter;
+	/* Check that the diagonal fits within the matrix. */
+	if (k >= 0) {
+		i = b.len;
+		j = k + b.len;
+	}
+	else {
+		i = b.len - k;
+		j = b.len;
+	}
+	if (!(i == A.dims[0] && j <= A.dims[1]) && !(j == A.dims[1] && i <= A.dims[0])) {
+		return BDLA_DIMENSION_MISMATCH;
+	}
+	bdla_Mxf_release(Y);
+	*Y = bdla_Mxf_copy(A);
+	i = j = 0;
+	if (k >= 0) { j = k; }
+	else { i = -k; }
+	for (iter = 0; iter < b.len; ++iter, ++i, ++j) {
+		bdla_Mxf_writevalue(*Y, i, j,
+			bdla_Mxf_value(*Y, i, j) - bdla_Vxf_value(b, iter));
 	}
 	return BDLA_GOOD;
 }
@@ -712,14 +782,15 @@ BDLA_EXPORT bdla_Status bdla_Mxf_row(bdla_Mxf A, int row, bdla_Vxf *y) {
 	return BDLA_GOOD;
 }
 
-BDLA_EXPORT bdla_Status bdla_Mxf_writerow(bdla_Mxf A, int row, bdla_Vxf *y) {
-	assert(y != NULL);	
+BDLA_EXPORT bdla_Status bdla_Mxf_writerow(bdla_Mxf A, int row, bdla_Vxf y) {
+	assert(y.arr != NULL);	
+	assert(y.len > 0);	
 	assert(A.arr != NULL);
 	assert(A.dims[0] > 0);
 	assert(A.dims[1] > 0);
-	if (A.dims[1] != y->len) { return BDLA_DIMENSION_MISMATCH; }
+	if (A.dims[1] != y.len) { return BDLA_DIMENSION_MISMATCH; }
 	if (row < 0 || row > A.dims[0]) { return BDLA_BAD_INDEX; }
-	memcpy(&A.arr[row * A.dims[1]], y->arr, sizeof(float)*A.dims[1]);
+	memcpy(&A.arr[row * A.dims[1]], y.arr, sizeof(float)*A.dims[1]);
 	return BDLA_GOOD;
 }
 
@@ -737,16 +808,17 @@ BDLA_EXPORT bdla_Status bdla_Mxf_col(bdla_Mxf A, int col, bdla_Vxf *y) {
 	return BDLA_GOOD;
 }
 
-BDLA_EXPORT bdla_Status bdla_Mxf_writecol(bdla_Mxf A, int col, bdla_Vxf *y) {
-	assert(y != NULL);
+BDLA_EXPORT bdla_Status bdla_Mxf_writecol(bdla_Mxf A, int col, bdla_Vxf y) {
+	assert(y.arr != NULL);
+	assert(y.len > 0);
 	assert(A.arr != NULL);
 	assert(A.dims[0] > 0);
 	assert(A.dims[1] > 0);
-	if (A.dims[0] != y->len) { return BDLA_DIMENSION_MISMATCH; }
+	if (A.dims[0] != y.len) { return BDLA_DIMENSION_MISMATCH; }
 	if (col < 0 || col > A.dims[1]) { return BDLA_BAD_INDEX; }
 	int i;
 	for (i = 0; i < A.dims[0]; ++i) {
-		A.arr[col + i * A.dims[1]] = y->arr[i];
+		A.arr[col + i * A.dims[1]] = y.arr[i];
 	}
 	return BDLA_GOOD;
 }
@@ -775,26 +847,83 @@ BDLA_EXPORT bdla_Status bdla_Mxf_submat(bdla_Mxf A, int row, int col, bdla_Mxf *
 	return BDLA_GOOD;
 }
 
-BDLA_EXPORT bdla_Status bdla_Mxf_writesubmat(bdla_Mxf A, int row, int col, bdla_Mxf *Y) {
-	assert(Y != NULL);
-	assert(Y->arr == NULL);
-	assert(Y->dims[1] >= 0);
-	assert(Y->dims[0] >= 0);
+BDLA_EXPORT bdla_Status bdla_Mxf_writesubmat(bdla_Mxf A, int row, int col, bdla_Mxf Y) {
+	assert(Y.arr == NULL);
+	assert(Y.dims[1] >= 0);
+	assert(Y.dims[0] >= 0);
 	assert(A.arr != NULL);
 	assert(A.dims[0] >= 0);
 	assert(A.dims[1] >= 0);
 	if (row < 0 || col < 0) { return BDLA_BAD_INDEX; }
-	if (A.dims[0] < row + Y->dims[0]) { return BDLA_BAD_INDEX; }
-	if (A.dims[1] < col + Y->dims[1]) { return BDLA_BAD_INDEX; }
+	if (A.dims[0] < row + Y.dims[0]) { return BDLA_BAD_INDEX; }
+	if (A.dims[1] < col + Y.dims[1]) { return BDLA_BAD_INDEX; }
 	int i, j, k, maxi, maxj;
-	maxi = row + Y->dims[0];
-	maxj = col + Y->dims[1];
+	maxi = row + Y.dims[0];
+	maxj = col + Y.dims[1];
 	k = 0;
 	for (i = row; i < maxi; ++i) {
 		for (j = col; j < maxj; ++j) {
-			A.arr[i * A.dims[1] + j] = Y->arr[k];
+			A.arr[i * A.dims[1] + j] = Y.arr[k];
 			++k;
 		}
+	}
+	return BDLA_GOOD;
+}
+
+BDLA_EXPORT bdla_Status bdla_Mxf_diag(bdla_Mxf A, int k, bdla_Vxf *b) {
+	assert(A.arr != NULL);
+	assert(A.dims[1] > 0);
+	assert(A.dims[0] > 0);
+	assert(b != NULL);
+	assert(b->arr != NULL);
+	assert(b->len > 0);
+	int i, j, iter, len;
+	/* Get the right size for b */
+	if (A.dims[0] > A.dims[1]) {
+		len = k >= 0 ? 
+			A.dims[1] - k : (
+				A.dims[0] + k < A.dims[1] ?
+					A.dims[0] + k : A.dims[1]);
+	} else {
+		len = k < 0 ?
+			A.dims[0] + k : (
+				A.dims[1] - k < A.dims[0] ?
+					A.dims[1] - k : A.dims[0]);
+	}
+	if (b->len != len) { bdla_Vxf_resize(b, len); }
+	i = j = 0;
+	if (k >= 0) { j = k; }
+	else { i = -k; }
+	for (iter = 0; iter < b->len; ++iter, ++i, ++j) {
+		bdla_Vxf_writevalue(*b, iter, bdla_Mxf_value(A, i, j));
+	}
+	return BDLA_GOOD;
+}
+
+BDLA_EXPORT bdla_Status bdla_Mxf_writediag(bdla_Mxf A, int k, bdla_Vxf b) {
+	assert(A.arr != NULL);
+	assert(A.dims[1] > 0);
+	assert(A.dims[0] > 0);
+	assert(b.arr != NULL);
+	assert(b.len > 0);
+	int i, j, iter;
+	/* Check that the diagonal fits within the matrix. */
+	if (k >= 0) {
+		i = b.len;
+		j = k + b.len;
+	}
+	else {
+		i = b.len - k;
+		j = b.len;
+	}
+	if (!(i == A.dims[0] && j <= A.dims[1]) && !(j == A.dims[1] && i <= A.dims[0])) {
+		return BDLA_DIMENSION_MISMATCH;
+	}
+	i = j = 0;
+	if (k >= 0) { j = k; }
+	else { i = -k; }
+	for (iter = 0; iter < b.len; ++iter, ++i, ++j) {
+		bdla_Mxf_writevalue(A, i, j, bdla_Vxf_value(b, iter));
 	}
 	return BDLA_GOOD;
 }
@@ -832,7 +961,7 @@ BDLA_EXPORT bdla_Status bdla_Mxf_eye(bdla_Mxf *A) {
 	}
 }
 
-BDLA_EXPORT bdla_Status bdla_Mxf_diag(bdla_Mxf *A, bdla_Vxf b, int k) {
+BDLA_EXPORT bdla_Status bdla_Mxf_diagonal (bdla_Mxf *A, bdla_Vxf b, int k) {
 	assert(A->arr != NULL);
 	assert(A->dims[0] >= 0);
 	assert(A->dims[1] >= 0);

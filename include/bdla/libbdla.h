@@ -86,8 +86,10 @@ BDLA_EXPORT int bdla_Mxf_istrilower(bdla_Mxf A);
 BDLA_EXPORT int bdla_Mxf_istriupper(bdla_Mxf A);
 /* Manipulation */
 BDLA_EXPORT bdla_Status bdla_Mxf_fplus(bdla_Mxf A, float b, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_diagplus(bdla_Mxf A, bdla_Vxf b, int k, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_plus(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_fminus(bdla_Mxf A, float B, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_diagminus(bdla_Mxf A, bdla_Vxf b, int k, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_minus(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_fmult(bdla_Mxf A, float b, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_ewmult(bdla_Mxf A, bdla_Mxf B, bdla_Mxf *Y);
@@ -107,16 +109,18 @@ BDLA_EXPORT bdla_Status bdla_Mxf_vdiagsolve(bdla_Mxf A,	bdla_Vxf b, bdla_Vxf *y)
 static inline float bdla_Mxf_value(bdla_Mxf A, int row, int col);
 static inline void bdla_Mxf_writevalue(bdla_Mxf A, int row, int col, float y);
 BDLA_EXPORT bdla_Status bdla_Mxf_row(bdla_Mxf A, int row, bdla_Vxf *y);
-BDLA_EXPORT bdla_Status bdla_Mxf_writerow(bdla_Mxf A, int row, bdla_Vxf *y);
+BDLA_EXPORT bdla_Status bdla_Mxf_writerow(bdla_Mxf A, int row, bdla_Vxf y);
 BDLA_EXPORT bdla_Status bdla_Mxf_col(bdla_Mxf A, int col, bdla_Vxf *y);
-BDLA_EXPORT bdla_Status bdla_Mxf_writecol(bdla_Mxf A, int col, bdla_Vxf *y);
+BDLA_EXPORT bdla_Status bdla_Mxf_writecol(bdla_Mxf A, int col, bdla_Vxf y);
 BDLA_EXPORT bdla_Status bdla_Mxf_submat(bdla_Mxf A, int row, int col, bdla_Mxf *Y);
-BDLA_EXPORT bdla_Status bdla_Mxf_writesubmat(bdla_Mxf A, int row, int col, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_writesubmat(bdla_Mxf A, int row, int col, bdla_Mxf Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_diag(bdla_Mxf A, int k, bdla_Vxf *b);
+BDLA_EXPORT bdla_Status bdla_Mxf_writediag(bdla_Mxf A, int k, bdla_Vxf b);
 /* Setting to specific values */
 BDLA_EXPORT bdla_Status bdla_Mxf_zero(bdla_Mxf *A);
 BDLA_EXPORT bdla_Status bdla_Mxf_uniform(bdla_Mxf *A, float b);
 BDLA_EXPORT bdla_Status bdla_Mxf_eye(bdla_Mxf *A);
-BDLA_EXPORT bdla_Status bdla_Mxf_diag(bdla_Mxf *A, bdla_Vxf b, int k);
+BDLA_EXPORT bdla_Status bdla_Mxf_diagonal(bdla_Mxf *A, bdla_Vxf b, int k);
 
 /* Vxf - Variable sized single precision vector ----------------------------*/
 /* Creation */

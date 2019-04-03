@@ -73,13 +73,13 @@ void testMxf(){
 	b = bdla_Mxf_create(5, 5);
 	va = bdla_Vxf_create(5);
 	bdla_Vxf_uniform(&va, 1.f);
-	bdla_Mxf_diag(&b, va, 0);
+	bdla_Mxf_diagonal(&b, va, 0);
 	TEST(bdla_Mxf_isequal(c, b));
 	bdla_Vxf_release(&va);
 	va = bdla_Vxf_create(3);
 	vb = bdla_Vxf_create(3);
 	bdla_Vxf_uniform(&va, 1.f);
-	bdla_Mxf_diag(&b, va, 2);
+	bdla_Mxf_diagonal(&b, va, 2);
 	TEST(bdla_Mxf_value(b, 0, 2) == 1.f);
 	TEST(bdla_Mxf_value(b, 1, 4) == 0.f);
 	TEST(bdla_Mxf_value(b, 0, 3) == 0.f);
@@ -113,7 +113,20 @@ void testMxf(){
 	TEST(bdla_Mxf_value(a, 0, 3) == 2.f);
 	bdla_Mxf_fplus(a, 2.f, &a);
 	TEST(bdla_Mxf_value(a, 0, 3) == 4.f);
-	/* Operations */				/* plus */
+	/* Operations */				/* diagonal plus */
+	bdla_Mxf_resize(&a, 4, 3);
+	bdla_Mxf_uniform(&a, 1.f);
+	bdla_Vxf_resize(&va, 3);
+	bdla_Vxf_writevalue(va, 1, 99.f);
+	TEST(bdla_Mxf_diagplus(a, va, 0, &b) == BDLA_GOOD);
+	TEST(bdla_Mxf_diagplus(a, va, 2, &b) == BDLA_DIMENSION_MISMATCH);
+	TEST(bdla_Mxf_diagplus(a, va, -2, &b) == BDLA_DIMENSION_MISMATCH);
+	TEST(bdla_Mxf_diagplus(a, va, -1, &b) == BDLA_GOOD);
+	TEST(bdla_Mxf_value(b, 2, 1) == 100.f);
+	/* Operations */				/* plus */	
+	bdla_Mxf_resize(&a, 3, 4);
+	bdla_Mxf_resize(&b, 3, 4);
+	bdla_Mxf_uniform(&a, 2.f);
 	bdla_Mxf_uniform(&a, 2.f);
 	bdla_Mxf_uniform(&b, -1.f);
 	bdla_Mxf_writevalue(b, 1, 2, 3.f);
@@ -128,7 +141,19 @@ void testMxf(){
 	TEST(bdla_Mxf_value(b, 1, 3) == 1.f);
 	TEST(bdla_Mxf_value(b, 0, 3) == 1.f);
 	TEST(bdla_Mxf_value(b, 1, 2) == 2.f);
+	/* Operations */				/* diagonal plus */
+	bdla_Mxf_resize(&a, 4, 3);
+	bdla_Mxf_uniform(&a, 1.f);
+	bdla_Vxf_resize(&va, 3);
+	bdla_Vxf_writevalue(va, 1, -99.f);
+	TEST(bdla_Mxf_diagminus(a, va, 0, &b) == BDLA_GOOD);
+	TEST(bdla_Mxf_diagminus(a, va, 2, &b) == BDLA_DIMENSION_MISMATCH);
+	TEST(bdla_Mxf_diagminus(a, va, -2, &b) == BDLA_DIMENSION_MISMATCH);
+	TEST(bdla_Mxf_diagminus(a, va, -1, &b) == BDLA_GOOD);
+	TEST(bdla_Mxf_value(b, 2, 1) == 100.f);
 	/* Operations */				/* minus */
+	bdla_Mxf_resize(&a, 3, 4);
+	bdla_Mxf_resize(&b, 3, 4);
 	bdla_Mxf_uniform(&a, 2.f);
 	bdla_Mxf_uniform(&b, -1.f);
 	bdla_Mxf_writevalue(b, 1, 2, 3.f);

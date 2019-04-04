@@ -59,9 +59,13 @@ void section(char section_name[]){
 
 #include "test_blasVxf.h"
 #include "test_blasMxf.h"
+#include "test_jacobi.h"
+#include "test_gauss_seidel.h"
 
 int main(int argc, char* argv[]){
 	testVxf();
 	testMxf();
+	testJacobi();
+	testGaussSeidel();
     SECTION("Ending!");
 }

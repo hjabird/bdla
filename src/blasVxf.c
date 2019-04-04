@@ -67,6 +67,22 @@ BDLA_EXPORT bdla_Status bdla_Vxf_resize(bdla_Vxf *a, int len) {
 	return BDLA_GOOD;
 }
 
+BDLA_EXPORT bdla_Status bdla_Vxf_copyin(bdla_Vxf *dest, bdla_Vxf source) {
+	assert(dest != NULL);
+	assert(dest->arr != NULL);
+	assert(dest->len > 0);
+	assert(source.arr != NULL);
+	assert(source.len > 0);
+	if (dest->arr == source.arr) { return BDLA_GOOD; }
+	if (source.len != dest->len) {
+		if (bdla_Vxf_resize(dest, source.len) != BDLA_GOOD) {
+			return BDLA_MEM_ERROR;
+		}
+	}
+	memcpy(dest->arr, source.arr, sizeof(float)*source.len);
+	return BDLA_GOOD;
+}
+
 BDLA_EXPORT int bdla_Vxf_length(bdla_Vxf A) {
 	assert(A.arr != NULL);
 	assert(A.arr >= 0);

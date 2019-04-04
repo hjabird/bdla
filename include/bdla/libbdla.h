@@ -75,6 +75,7 @@ BDLA_EXPORT bdla_Mxf bdla_Mxf_copy(bdla_Mxf mat);
 BDLA_EXPORT void bdla_Mxf_transpose(bdla_Mxf A, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_reshape(bdla_Mxf A, int rows, int cols, bdla_Mxf *Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_resize(bdla_Mxf *A, int rows, int cols);
+BDLA_EXPORT bdla_Status bdla_Mxf_copyin(bdla_Mxf *dest, bdla_Mxf source);
 /* Info */
 BDLA_EXPORT int bdla_Mxf_rows(bdla_Mxf A);
 BDLA_EXPORT int bdla_Mxf_cols(bdla_Mxf A);
@@ -116,6 +117,8 @@ BDLA_EXPORT bdla_Status bdla_Mxf_submat(bdla_Mxf A, int row, int col, bdla_Mxf *
 BDLA_EXPORT bdla_Status bdla_Mxf_writesubmat(bdla_Mxf A, int row, int col, bdla_Mxf Y);
 BDLA_EXPORT bdla_Status bdla_Mxf_diag(bdla_Mxf A, int k, bdla_Vxf *b);
 BDLA_EXPORT bdla_Status bdla_Mxf_writediag(bdla_Mxf A, int k, bdla_Vxf b);
+BDLA_EXPORT bdla_Status bdla_Mxf_tri(bdla_Mxf A, int k, bdla_MatrixProperty prop, bdla_Mxf *Y);
+BDLA_EXPORT bdla_Status bdla_Mxf_writetri(bdla_Mxf A, int k, bdla_MatrixProperty prop, bdla_Mxf Y);
 /* Setting to specific values */
 BDLA_EXPORT bdla_Status bdla_Mxf_zero(bdla_Mxf *A);
 BDLA_EXPORT bdla_Status bdla_Mxf_uniform(bdla_Mxf *A, float b);
@@ -129,6 +132,7 @@ BDLA_EXPORT void bdla_Vxf_release(bdla_Vxf *vec);
 BDLA_EXPORT bdla_Vxf bdla_Vxf_copy(bdla_Vxf vec);
 /* Shape changing */
 BDLA_EXPORT bdla_Status bdla_Vxf_resize(bdla_Vxf *a, int len);
+BDLA_EXPORT bdla_Status bdla_Vxf_copyin(bdla_Vxf *dest, bdla_Vxf source);
 /* Info */
 BDLA_EXPORT int bdla_Vxf_length(bdla_Vxf a);
 BDLA_EXPORT int bdla_Vxf_isequal(bdla_Vxf a, bdla_Vxf b);
@@ -157,6 +161,12 @@ BDLA_EXPORT bdla_Status bdla_Vxf_writesubvec(bdla_Vxf a, int pos, bdla_Vxf *y);
 BDLA_EXPORT bdla_Status bdla_Vxf_zero(bdla_Vxf *a);
 BDLA_EXPORT bdla_Status bdla_Vxf_uniform(bdla_Vxf *a, float b);
 BDLA_EXPORT bdla_Status bdla_Vxf_linspace(bdla_Vxf *a, float startval, float endval);
+
+/* Linear solvers */
+BDLA_EXPORT bdla_Status bdla_Mxf_solve_jacobi(
+	bdla_Mxf A, bdla_Vxf b, bdla_Vxf *y, float tol, bdla_Vxf *guess, int *max_iter);
+BDLA_EXPORT bdla_Status bdla_Mxf_solve_gauss_seidel(
+	bdla_Mxf A, bdla_Vxf b, bdla_Vxf *y, float tol, bdla_Vxf *guess, int *max_iter);
 
 /* IMPLEMENTATION ----------------------------------------------------------*/
 

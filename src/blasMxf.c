@@ -135,6 +135,26 @@ BDLA_EXPORT bdla_Status bdla_Mxf_resize(bdla_Mxf *A, int rows, int cols) {
 	return BDLA_GOOD;
 }
 
+BDLA_EXPORT bdla_Status bdla_Mxf_copyin(bdla_Mxf *dest, bdla_Mxf source) {
+	assert(dest != NULL);
+	assert(dest->arr != NULL);
+	assert(dest->dims[0] > 0);
+	assert(dest->dims[1] > 0);
+	assert(source.arr != NULL);
+	assert(source.dims[0] > 0);
+	assert(source.dims[1] > 0);
+	if (dest->arr == source.arr) { return BDLA_GOOD; } /* Nothing to do */
+	if (dest->dims[0] * dest->dims[1] != source.dims[0] * source.dims[1]) {
+		if (bdla_Mxf_resize(dest, source.dims[0], source.dims[1]) 
+			== BDLA_MEM_ERROR) {
+			return BDLA_MEM_ERROR;
+		}
+	}
+	memcpy(dest->arr, source.arr, 
+		sizeof(float) * source.dims[1] * source.dims[0]);
+	return BDLA_GOOD;
+}
+
 BDLA_EXPORT int bdla_Mxf_rows(bdla_Mxf A) {
 	assert(A.arr != NULL);
 	assert(A.dims[0] > 0);
@@ -330,8 +350,10 @@ BDLA_EXPORT bdla_Status bdla_Mxf_diagplus(bdla_Mxf A, bdla_Vxf b, int k, bdla_Mx
 	if (!(i == A.dims[0] && j <= A.dims[1]) && !(j == A.dims[1] && i <= A.dims[0])) {
 		return BDLA_DIMENSION_MISMATCH;
 	}
-	bdla_Mxf_release(Y);
-	*Y = bdla_Mxf_copy(A);
+	if (Y->arr != A.arr) {
+		bdla_Mxf_release(Y);
+		*Y = bdla_Mxf_copy(A);
+	}
 	i = j = 0;
 	if (k >= 0) { j = k; }
 	else { i = -k; }
@@ -407,8 +429,10 @@ BDLA_EXPORT bdla_Status bdla_Mxf_diagminus(bdla_Mxf A, bdla_Vxf b, int k, bdla_M
 	if (!(i == A.dims[0] && j <= A.dims[1]) && !(j == A.dims[1] && i <= A.dims[0])) {
 		return BDLA_DIMENSION_MISMATCH;
 	}
-	bdla_Mxf_release(Y);
-	*Y = bdla_Mxf_copy(A);
+	if (Y->arr != A.arr) {
+		bdla_Mxf_release(Y);
+		*Y = bdla_Mxf_copy(A);
+	}
 	i = j = 0;
 	if (k >= 0) { j = k; }
 	else { i = -k; }
@@ -924,6 +948,114 @@ BDLA_EXPORT bdla_Status bdla_Mxf_writediag(bdla_Mxf A, int k, bdla_Vxf b) {
 	else { i = -k; }
 	for (iter = 0; iter < b.len; ++iter, ++i, ++j) {
 		bdla_Mxf_writevalue(A, i, j, bdla_Vxf_value(b, iter));
+	}
+	return BDLA_GOOD;
+}
+
+BDLA_EXPORT bdla_Status bdla_Mxf_tri(bdla_Mxf A, int k, bdla_MatrixProperty prop, bdla_Mxf *Y) {
+	assert(A.arr != NULL);
+	assert(A.dims[0] > 0);
+	assert(A.dims[1] > 0);
+	assert(Y != NULL);
+	assert(Y->arr != NULL);
+	assert(Y->dims[0] > 0);
+	assert(Y->dims[1] > 0);
+	assert(prop == BDLA_MATRIX_TRI_UPPER || prop == BDLA_MATRIX_TRI_LOWER);
+	if (A.dims[0] != A.dims[1]) { return BDLA_NONSQUARE; }
+	if (Y->dims[0] != A.dims[0] || Y->dims[1] != A.dims[1]) {
+		if (bdla_Mxf_resize(Y, A.dims[0], A.dims[1]) == BDLA_MEM_ERROR) {
+			return BDLA_MEM_ERROR;
+		}
+	}
+	int i, j, alias = 0;
+	if (Y->arr == A.arr) {
+		alias = 1;
+		Y->arr = malloc(sizeof(float) * A.dims[0] * A.dims[1]);
+		if(Y->arr == NULL){
+			Y->arr = A.arr;
+			return BDLA_MEM_ERROR;
+		}
+	}
+	bdla_Mxf_zero(Y);
+	if (k >= 0) {
+		if (prop == BDLA_MATRIX_TRI_UPPER) {
+			for (i = 0; i < A.dims[0] - k; ++i) {
+				for (j = k + i; j < A.dims[1]; ++j) {
+					bdla_Mxf_writevalue(*Y, i, j, bdla_Mxf_value(A, i, j));
+				}
+			}
+		} else {
+			for (i = 0; i < A.dims[0]; ++i) {
+				for (j = 0; j < (k + i < A.dims[1] ? k + i + 1: A.dims[1]); ++j) {
+					bdla_Mxf_writevalue(*Y, i, j, bdla_Mxf_value(A, i, j));
+				}
+			}
+		}
+	} else {
+		if (prop == BDLA_MATRIX_TRI_UPPER) {
+			for (i = 0; i <= A.dims[0]; ++i) {
+				for (j = (i < -k ? 0 : i + k ); j < A.dims[1]; ++j) {
+					bdla_Mxf_writevalue(*Y, i, j, bdla_Mxf_value(A, i, j));
+				}
+			}
+		} else {
+			for (i = -k; i < A.dims[0]; ++i) {
+				for (j = 0; j <= i + k; ++j) {
+					bdla_Mxf_writevalue(*Y, i, j, bdla_Mxf_value(A, i, j));
+				}
+			}
+		}
+	}
+	if (alias) {
+		free(A.arr);
+	}
+	return BDLA_GOOD;
+}
+
+BDLA_EXPORT bdla_Status bdla_Mxf_writetri(bdla_Mxf A, int k, bdla_MatrixProperty prop, bdla_Mxf Y) {
+	assert(A.arr != NULL);
+	assert(A.dims[0] > 0);
+	assert(A.dims[1] > 0);
+	assert(Y.arr != NULL);
+	assert(Y.dims[0] > 0);
+	assert(Y.dims[1] > 0);
+	assert(prop == BDLA_MATRIX_TRI_UPPER || prop == BDLA_MATRIX_TRI_LOWER);
+	if (A.dims[0] != A.dims[1]) { return BDLA_NONSQUARE; }
+	if (Y.dims[0] != A.dims[0] || Y.dims[1] != A.dims[1]) {
+		return BDLA_DIMENSION_MISMATCH;
+	}
+	int i, j;
+	if (k >= 0) {
+		if (prop == BDLA_MATRIX_TRI_UPPER) {
+			for (i = 0; i < A.dims[0] - k; ++i) {
+				for (j = k + i; j < A.dims[1]; ++j) {
+					bdla_Mxf_writevalue(A, i, j, bdla_Mxf_value(Y, i, j));
+				}
+			}
+		}
+		else {
+			for (i = 0; i < A.dims[0]; ++i) {
+				for (j = 0; j < (k + i < A.dims[1] ? k + i + 1: A.dims[1]); ++j) {
+					bdla_Mxf_writevalue(A, i, j, bdla_Mxf_value(Y, i, j));
+				}
+			}
+		}
+	}
+	else {
+		if (prop == BDLA_MATRIX_TRI_UPPER) {
+			for (i = 0; i < A.dims[0]; ++i) {
+				for (j = (i < -k ? 0 : i + k); j < A.dims[1]; ++j) {
+					bdla_Mxf_writevalue(A, i, j, bdla_Mxf_value(Y, i, j));
+				}
+			}
+		}
+		else {
+			for (i = -k; i < A.dims[0]; ++i) {
+				for (j = 0; j <= i + k; ++j) {
+					bdla_Mxf_writevalue(A, i, j, bdla_Mxf_value(Y, i, j));
+				}
+			}
+		}
 	}
 	return BDLA_GOOD;
 }
